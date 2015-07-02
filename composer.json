@@ -1,0 +1,20 @@
+{
+    "name": "aeyoll/april-international-ws",
+    "type": "library",
+    "description": "April International Webservice",
+    "keywords": [],
+    "homepage": "http://jp.bidega.in",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jean-Philippe Bidegain",
+            "email": "jp@bidega.in"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "autoload": {
+        "psr-4": { "Aeyoll\\AprilInternationalWs\\": "src/" }
+    }
+}
