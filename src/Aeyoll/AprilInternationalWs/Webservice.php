@@ -26,6 +26,17 @@ class Webservice
     private $credentials = array();
 
     /**
+     * Stream context options
+     *
+     * @var array
+     */
+    private $streamOptions = array(
+        'http' => array(
+            'timeout' => 3
+        )
+    );
+
+    /**
      * WSDL link
      *
      * @var string
@@ -77,10 +88,18 @@ class Webservice
         'ProblemGeneratingFile'                => 'Probleme de génération du fichier',
         'NoAssistanceForVouche'                => 'Pas d’assistance pour ce contrat'
     );
+
+    /**
+     * Last error message
+     *
+     * @var string
+     */
+    private $error;
+
     /**
      * Constructor
      *
-     * @param array $credentials [description]
+     * @param  array $credentials   Credential informations
      */
     public function __construct(array $credentials)
     {
@@ -97,22 +116,80 @@ class Webservice
      */
     private function call($service, $params = array())
     {
-        $client = new \SoapClient($this->wsdl);
-        $params = $this->credentials + $params;
+        $result = array();
 
         try {
+            $client = new \SoapClient($this->wsdl, $this->getClientOptions());
+            $params = $this->credentials + $params;
+
             $result = $client->__soapCall($service, $params);
         } catch (\Exception $e) {
             $message = $e->getMessage();
 
             if (isset($this->errors[$message])) {
-                $result = $this->errors[$message];
+                $this->error = $this->errors[$message];
             } else {
-                $result = $message;
+                $this->error = $message;
             }
         }
 
         return $result;
+    }
+
+    /**
+     * Get the SOAP client options
+     *
+     * @return array
+     */
+    public function getClientOptions()
+    {
+        return array(
+            'stream_context' => $this->getStreamContext()
+        );
+    }
+
+    /**
+     * Get the last error message
+     *
+     * @return string
+     */
+    public function getError()
+    {
+        return $this->error;
+    }
+
+    /**
+     * Get the steam context
+     *
+     * @return array
+     */
+    private function getStreamContext()
+    {
+        return stream_context_create($this->getStreamOptions());
+    }
+
+    /**
+     * Set the stream options
+     *
+     * @param array $streamOptions
+     *
+     * @return self
+     */
+    public function setStreamOptions(array $streamOptions)
+    {
+        $this->streamOptions = $streamOptions;
+
+        return $this;
+    }
+
+    /**
+     * Get the stream options
+     *
+     * @return array
+     */
+    public function getStreamOptions()
+    {
+        return $this->streamOptions;
     }
 
     /**
